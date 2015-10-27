@@ -69,13 +69,13 @@ NSUserDefaults *deviceCache;
     [cell updateFonts];
     
     NSDictionary *dict = [dataArray objectAtIndex:indexPath.row];
-    NSNumber *itemID = [dict objectForKey:@"id"];
-    NSString *author = [dict objectForKey:@"author"];
-    NSString *question = [dict objectForKey:@"question"];
-    NSString *imgURL = [NSString stringWithFormat:@"%@%@",url, [dict objectForKey:@"img-url"]];
+    NSNumber *itemID = [dict objectForKey:@"ID"];
+    NSString *author = [dict objectForKey:@"AuthorName"];
+    NSString *question = [dict objectForKey:@"Question"];
+    NSString *imgURL = [NSString stringWithFormat:@"%@%@",url, [dict objectForKey:@"ImgURL"]];
     
-    long int yesVotes = [[dict objectForKey:@"yes"] integerValue];
-    long int noVotes = [[dict objectForKey:@"no"] integerValue];
+    long int yesVotes = [[dict objectForKey:@"YesVotes"] integerValue];
+    long int noVotes = [[dict objectForKey:@"NoVotes"] integerValue];
     long int totalVotes = yesVotes + noVotes;
     
     cell.questionLabel.text = question;
@@ -90,6 +90,8 @@ NSUserDefaults *deviceCache;
     cell.yesButton.layer.borderColor = [UIColor whiteColor].CGColor;
     cell.noButton.layer.borderColor = [UIColor whiteColor].CGColor;
     cell.yesButton.tag = cell.noButton.tag = [itemID integerValue];
+    [cell enableCellButtons];
+
     
     [cell.yesButton addTarget:self action:@selector(tappedYes:) forControlEvents:UIControlEventTouchUpInside];
     [cell.noButton addTarget:self action:@selector(tappedNo:) forControlEvents:UIControlEventTouchUpInside];
@@ -108,11 +110,14 @@ NSUserDefaults *deviceCache;
     NSLog(@"myvote: %@", myVote);
     if (myVote)
     {
+        [cell disableCellButtons];
         double yesPercent = ((double)yesVotes / totalVotes) * 100.0f;
         double noPercent = ((double)noVotes / totalVotes) * 100.0f;
         cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
         if ([myVote isEqualToString:@"yes"])
+        {
             cell.yesButton.layer.borderColor = [UIColor redColor].CGColor;
+        }
         else if ([myVote isEqualToString:@"no"])
             cell.noButton.layer.borderColor = [UIColor redColor].CGColor;
     }
@@ -134,12 +139,29 @@ NSUserDefaults *deviceCache;
     MZTableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
     NSMutableDictionary *dict = [dataArray objectAtIndex:indexPath.row];
 
-    long int yesVotes = [[dict objectForKey:@"yes"] integerValue] + 1;
-    long int noVotes = [[dict objectForKey:@"no"] integerValue];
+    long int yesVotes = [[dict objectForKey:@"YesVotes"] integerValue] + 1;
+    long int noVotes = [[dict objectForKey:@"NoVotes"] integerValue];
     long int totalVotes = yesVotes + noVotes;
     double yesPercent = ((double)yesVotes / totalVotes) * 100.0f;
     double noPercent = ((double)noVotes / totalVotes) * 100.0f;
     cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
+    
+
+    [cell disableCellButtons];
+    NSURL *upvoteurl = [NSURL URLWithString:[NSString stringWithFormat:@"%@upvote",url]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:upvoteurl
+                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                                       timeoutInterval:60.0];
+    
+    [request setHTTPMethod:@"POST"];
+    NSString * params = [NSString stringWithFormat:@"id=%@", key];
+    [request setHTTPBody:[params dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    NSURLSessionDataTask *postDataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        NSLog(@"response: %@", [response URL]);
+    }];
+    
+    [postDataTask resume];
 
 }
 
@@ -152,14 +174,31 @@ NSUserDefaults *deviceCache;
     CGPoint buttonPosition = [sender convertPoint:CGPointZero toView:self.tableView];
     NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:buttonPosition];
     MZTableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
-    NSMutableDictionary *dict = [dataArray objectAtIndex:indexPath.row];
-    
-    long int yesVotes = [[dict objectForKey:@"yes"] integerValue];
-    long int noVotes = [[dict objectForKey:@"no"] integerValue] + 1;
+    NSDictionary *dict = [dataArray objectAtIndex:indexPath.row];
+    long int yesVotes = [[dict objectForKey:@"YesVotes"] integerValue];
+    long int noVotes = [[dict objectForKey:@"NoVotes"] integerValue] + 1;
     long int totalVotes = yesVotes + noVotes;
     double yesPercent = ((double)yesVotes / totalVotes) * 100.0f;
     double noPercent = ((double)noVotes / totalVotes) * 100.0f;
     cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
+    
+    [cell disableCellButtons];
+
+    NSURL *upvoteurl = [NSURL URLWithString:[NSString stringWithFormat:@"%@downvote",url]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:upvoteurl
+                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                                       timeoutInterval:60.0];
+    
+    [request setHTTPMethod:@"POST"];
+    NSString * params = [NSString stringWithFormat:@"id=%@", [@(sender.tag) stringValue]];
+    [request setHTTPBody:[params dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    NSURLSessionDataTask *postDataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        NSLog(@"response: %@", [response URL]);
+    }];
+    
+    [postDataTask resume];
+
 }
 
 @end

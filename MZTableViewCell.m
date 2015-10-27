@@ -137,5 +137,17 @@
 
 }
 
+- (void)disableCellButtons
+{
+    self.yesButton.userInteractionEnabled = NO;
+    self.noButton.userInteractionEnabled = NO;
+}
+
+- (void)enableCellButtons
+{
+    self.yesButton.userInteractionEnabled = YES;
+    self.noButton.userInteractionEnabled = YES;
+}
+
 
 @end

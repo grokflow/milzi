@@ -24,6 +24,9 @@
 @property (nonatomic, strong) UIView* cellSeparator;
 
 - (void)updateFonts;
+- (void)enableCellButtons;
+- (void)disableCellButtons;
+
 
 
 @end
