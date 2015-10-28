@@ -12,6 +12,7 @@
 		816DB5511BD018120027BC68 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 816DB5501BD018120027BC68 /* Assets.xcassets */; };
 		816DB55F1BD018120027BC68 /* milziTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 816DB55E1BD018120027BC68 /* milziTests.m */; };
 		816DB56A1BD018120027BC68 /* milziUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 816DB5691BD018120027BC68 /* milziUITests.m */; };
+		817546251BDFDCC000EE0E78 /* MZAddPollViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 817546241BDFDCC000EE0E78 /* MZAddPollViewController.m */; };
 		81A454881BD16607007119A7 /* MZFeedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 81A454861BD16607007119A7 /* MZFeedViewController.m */; };
 		81EBFCC01BD98E9F00CA8482 /* placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 81EBFCBF1BD98E9F00CA8482 /* placeholder.png */; };
 		81EDB10E1BD6BCBB00491320 /* MZTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 81EDB10D1BD6BCBB00491320 /* MZTableViewCell.m */; };
@@ -49,6 +50,8 @@
 		816DB5651BD018120027BC68 /* milziUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = milziUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		816DB5691BD018120027BC68 /* milziUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = milziUITests.m; sourceTree = "<group>"; };
 		816DB56B1BD018120027BC68 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		817546231BDFDCC000EE0E78 /* MZAddPollViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZAddPollViewController.h; sourceTree = "<group>"; };
+		817546241BDFDCC000EE0E78 /* MZAddPollViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MZAddPollViewController.m; sourceTree = "<group>"; };
 		81A454851BD16607007119A7 /* MZFeedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZFeedViewController.h; sourceTree = "<group>"; };
 		81A454861BD16607007119A7 /* MZFeedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MZFeedViewController.m; sourceTree = "<group>"; };
 		81EBFCBF1BD98E9F00CA8482 /* placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeholder.png; sourceTree = "<group>"; };
@@ -99,6 +102,8 @@
 				81A454861BD16607007119A7 /* MZFeedViewController.m */,
 				81EDB10C1BD6BCBB00491320 /* MZTableViewCell.h */,
 				81EDB10D1BD6BCBB00491320 /* MZTableViewCell.m */,
+				817546231BDFDCC000EE0E78 /* MZAddPollViewController.h */,
+				817546241BDFDCC000EE0E78 /* MZAddPollViewController.m */,
 				816DB5431BD018120027BC68 /* milzi */,
 				816DB55D1BD018120027BC68 /* milziTests */,
 				816DB5681BD018120027BC68 /* milziUITests */,
@@ -351,6 +356,7 @@
 				81A454881BD16607007119A7 /* MZFeedViewController.m in Sources */,
 				81EDB10E1BD6BCBB00491320 /* MZTableViewCell.m in Sources */,
 				816DB5461BD018120027BC68 /* main.m in Sources */,
+				817546251BDFDCC000EE0E78 /* MZAddPollViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

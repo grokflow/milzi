@@ -8,7 +8,7 @@
 
 #import "MZFeedViewController.h"
 
-NSString *url = @"http://192.168.1.125:5000/";
+NSString *url = @"http://10.0.0.2:5000/";
 NSURLSession *session;
 NSMutableArray *dataArray;
 static NSString *CellIdentifier = @"MilZiCellID";
@@ -35,7 +35,11 @@ NSUserDefaults *deviceCache;
     // Setting the estimated row height prevents the table view from calling tableView:heightForRowAtIndexPath: for every row in the table on first load;
     // it will only be called as cells are about to scroll onscreen. This is a major performance optimization.
     self.tableView.estimatedRowHeight = 200.0; // set this to whatever your "average" cell height is; it doesn't need to be very accurate
-    session = [NSURLSession sharedSession];
+
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    configuration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
+    session = [NSURLSession sessionWithConfiguration:configuration];
+    
     dataArray = [[NSMutableArray alloc] init];
     NSURLSessionDataTask *dataTask = [session dataTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
@@ -86,18 +90,44 @@ NSUserDefaults *deviceCache;
                                      [cell setNeedsUpdateConstraints];
                                      [cell updateConstraintsIfNeeded];
                                  }];
-
+    
     cell.yesButton.layer.borderColor = [UIColor whiteColor].CGColor;
     cell.noButton.layer.borderColor = [UIColor whiteColor].CGColor;
     cell.yesButton.tag = cell.noButton.tag = [itemID integerValue];
     [cell enableCellButtons];
-
+    
     
     [cell.yesButton addTarget:self action:@selector(tappedYes:) forControlEvents:UIControlEventTouchUpInside];
     [cell.noButton addTarget:self action:@selector(tappedNo:) forControlEvents:UIControlEventTouchUpInside];
-
-   
-    if (totalVotes == 0)
+    
+    
+    NSString *myVote = [deviceCache stringForKey:[itemID stringValue]];
+    NSLog(@"myvote: %@", myVote);
+    
+    NSLog(@"total votes: %ld", totalVotes);
+    
+    if (myVote)
+    {
+        //adding 1 to all the calculations since votes in this session are not reflected in the dictionary retrieved from the server since it is immutable.
+        // this will skew the results by one when we sync with the server
+        [cell disableCellButtons];
+        double yesPercent, noPercent;
+        ++totalVotes;
+        if ([myVote isEqualToString:@"yes"])
+        {
+            ++yesVotes;
+            cell.yesButton.layer.borderColor = [UIColor redColor].CGColor;
+        }
+        else if ([myVote isEqualToString:@"no"])
+        {
+            ++noVotes;
+            cell.noButton.layer.borderColor = [UIColor redColor].CGColor;
+        }
+        yesPercent = ((double)yesVotes / totalVotes) * 100.0f;
+        noPercent = ((double)noVotes / totalVotes) * 100.0f;
+        
+        cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
+    } else if (totalVotes == 0)
     {
         cell.voteCountLabel.text = @"Be the first to vote!";
     } else
@@ -105,27 +135,14 @@ NSUserDefaults *deviceCache;
         cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes", totalVotes];
     }
     
-
-    NSString *myVote = [deviceCache stringForKey:[itemID stringValue]];
-    NSLog(@"myvote: %@", myVote);
-    if (myVote)
-    {
-        [cell disableCellButtons];
-        double yesPercent = ((double)yesVotes / totalVotes) * 100.0f;
-        double noPercent = ((double)noVotes / totalVotes) * 100.0f;
-        cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
-        if ([myVote isEqualToString:@"yes"])
-        {
-            cell.yesButton.layer.borderColor = [UIColor redColor].CGColor;
-        }
-        else if ([myVote isEqualToString:@"no"])
-            cell.noButton.layer.borderColor = [UIColor redColor].CGColor;
-    }
+    
     
     [cell setNeedsUpdateConstraints];
     [cell updateConstraintsIfNeeded];
     
 }
+
+//to do, combine the 2 voting network calls to one
 -(void)tappedYes:(UIButton *)sender
 {
     NSString *key =[@(sender.tag) stringValue];
@@ -138,7 +155,7 @@ NSUserDefaults *deviceCache;
     NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:buttonPosition];
     MZTableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
     NSMutableDictionary *dict = [dataArray objectAtIndex:indexPath.row];
-
+    
     long int yesVotes = [[dict objectForKey:@"YesVotes"] integerValue] + 1;
     long int noVotes = [[dict objectForKey:@"NoVotes"] integerValue];
     long int totalVotes = yesVotes + noVotes;
@@ -146,7 +163,7 @@ NSUserDefaults *deviceCache;
     double noPercent = ((double)noVotes / totalVotes) * 100.0f;
     cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
     
-
+    
     [cell disableCellButtons];
     NSURL *upvoteurl = [NSURL URLWithString:[NSString stringWithFormat:@"%@upvote",url]];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:upvoteurl
@@ -162,7 +179,7 @@ NSUserDefaults *deviceCache;
     }];
     
     [postDataTask resume];
-
+    
 }
 
 -(void)tappedNo:(UIButton *)sender
@@ -183,7 +200,7 @@ NSUserDefaults *deviceCache;
     cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
     
     [cell disableCellButtons];
-
+    
     NSURL *upvoteurl = [NSURL URLWithString:[NSString stringWithFormat:@"%@downvote",url]];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:upvoteurl
                                                            cachePolicy:NSURLRequestUseProtocolCachePolicy
@@ -198,7 +215,7 @@ NSUserDefaults *deviceCache;
     }];
     
     [postDataTask resume];
-
+    
 }
 
 @end

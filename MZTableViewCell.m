@@ -78,6 +78,7 @@
     self.nameLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleCaption2];
 }
 
+//TODO remove 320 as screen width!
 - (void)updateConstraints
 {
     CGSize screenRect = [[UIScreen mainScreen] bounds].size;
