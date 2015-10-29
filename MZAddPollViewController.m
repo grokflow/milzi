@@ -21,6 +21,7 @@ NSString *POST_URL_STRING = @"http://10.0.0.2:5000/upload";
 @property (nonatomic, strong) UIView *buttonsView;
 @property (nonatomic, strong) UIButton *takeImageBtn, *selectImgBtn;
 @property (nonatomic, strong) UITextView* questionTextView;
+
 @end
 
 @implementation MZAddPollViewController

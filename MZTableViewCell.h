@@ -12,16 +12,13 @@
 
 
 @interface MZTableViewCell : UITableViewCell
-@property NSString *authorLabelString;
-@property NSString *questionLabelString;
-@property NSString *imgUrlString;
+
 @property (nonatomic, strong) UILabel* questionLabel;
 @property (nonatomic, strong) UILabel* nameLabel;
 @property (nonatomic, strong) UIImageView* mainImageView;
 @property (nonatomic, strong) UIButton* yesButton;
 @property (nonatomic, strong) UIButton* noButton;
 @property (nonatomic, strong) UILabel* voteCountLabel;
-@property (nonatomic, strong) UIView* cellSeparator;
 
 - (void)updateFonts;
 - (void)enableCellButtons;
