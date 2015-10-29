@@ -23,8 +23,8 @@
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         self.questionLabel = [UILabel newAutoLayoutView];
-        [self.questionLabel setLineBreakMode:NSLineBreakByTruncatingTail];
-        [self.questionLabel setNumberOfLines:1];
+        [self.questionLabel setLineBreakMode:NSLineBreakByWordWrapping];
+        [self.questionLabel setNumberOfLines:3];
         [self.questionLabel setTextAlignment:NSTextAlignmentLeft];
         [self.questionLabel setTextColor:[UIColor blackColor]];
         
