@@ -14,6 +14,8 @@ NSURLSession *session;
 NSMutableArray *dataArray;
 NSUserDefaults *deviceCache;
 
+@class MZNewUserViewController;
+
 @interface MZFeedViewController ()
 
 @end
@@ -26,38 +28,91 @@ NSUserDefaults *deviceCache;
     
     [self.navigationItem setTitle:@"milzi"];
     
-    
     [self.tableView registerClass:[MZTableViewCell class] forCellReuseIdentifier:CellIdentifier];
     self.tableView.rowHeight = UITableViewAutomaticDimension;
+    self.tableView.estimatedRowHeight = 200.0;
+    
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.tableView.allowsSelection = NO;
     self.tableView.showsVerticalScrollIndicator = NO;
-    // Self-sizing table view cells in iOS 8 are enabled when the estimatedRowHeight property of the table view is set to a non-zero value.
-    // Setting the estimated row height prevents the table view from calling tableView:heightForRowAtIndexPath: for every row in the table on first load;
-    // it will only be called as cells are about to scroll onscreen. This is a major performance optimization.
-    self.tableView.estimatedRowHeight = 200.0; // set this to whatever your "average" cell height is; it doesn't need to be very accurate
     
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     configuration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
     session = [NSURLSession sessionWithConfiguration:configuration];
-    
+    deviceCache = [NSUserDefaults standardUserDefaults];
+
     dataArray = [[NSMutableArray alloc] init];
+    [self getLatestUpdates];
+    
+    if ([deviceCache boolForKey:@"friend"] == NO)
+    {
+        [self showNewUserScreen];
+    }
+    [self setupRefreshControl];
+}
+
+- (void)showNewUserScreen
+{
+    MZNewUserViewController *newUserViewController = [[MZNewUserViewController alloc] init];
+    newUserViewController.modalPresentationStyle = UIModalPresentationOverCurrentContext;
+    newUserViewController.feedVC = self;
+    
+    self.navigationController.modalPresentationStyle = UIModalTransitionStyleCoverVertical;
+    [self.navigationController presentViewController:newUserViewController animated:YES completion:nil];
+
+}
+- (void) setupRefreshControl
+{
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    self.refreshControl.backgroundColor = [UIColor purpleColor];
+    self.refreshControl.tintColor = [UIColor whiteColor];
+    [self.refreshControl addTarget:self
+                            action:@selector(getLatestUpdates)
+                  forControlEvents:UIControlEventValueChanged];
+    NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObject:[UIColor whiteColor]
+                                                                forKey:NSForegroundColorAttributeName];
+    
+    NSAttributedString *attributedTitle = [[NSAttributedString alloc] initWithString:@"grabbing more gems" attributes:attrsDictionary];
+    self.refreshControl.attributedTitle = attributedTitle;
+    
+
+}
+- (void)getLatestUpdates
+{
     NSURLSessionDataTask *dataTask = [session dataTaskWithURL:[NSURL URLWithString:BASE_URL] completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         dataArray = [[NSMutableArray alloc] initWithArray:[json objectForKey:@"data"]];
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.tableView reloadData];
+            [self.refreshControl endRefreshing];
+
         });
     }];
     [dataTask resume];
-    
-    deviceCache = [NSUserDefaults standardUserDefaults];
+
     
 }
-
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 1;
+    if ([dataArray count])
+    {
+        return 1;
+        
+    } else
+    {
+        UILabel *messageLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height)];
+        
+        messageLabel.text = @"No data is currently available. Please pull down to refresh.";
+        messageLabel.textColor = [UIColor blackColor];
+        messageLabel.numberOfLines = 0;
+        messageLabel.textAlignment = NSTextAlignmentCenter;
+        messageLabel.font = [UIFont systemFontOfSize:20];
+        [messageLabel sizeToFit];
+        
+        self.tableView.backgroundView = messageLabel;
+        self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    }
+    return 0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -170,13 +225,13 @@ NSUserDefaults *deviceCache;
     //sender.tag has the cell's IndexPath.row
     NSMutableDictionary *dict = [dataArray objectAtIndex:sender.tag];
     NSString *itemID = [[dict objectForKey:@"ID"] stringValue];
-
+    
     [deviceCache setValue:@"no" forKey:itemID];
     [deviceCache synchronize];
     sender.layer.borderColor = [UIColor redColor].CGColor;
     
     MZTableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:sender.tag inSection:0]];
-
+    
     long int yesVotes = [[dict objectForKey:@"YesVotes"] integerValue];
     long int noVotes = [[dict objectForKey:@"NoVotes"] integerValue] + 1;
     long int totalVotes = yesVotes + noVotes;

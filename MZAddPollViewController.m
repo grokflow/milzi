@@ -124,10 +124,14 @@ NSString *POST_URL_STRING = @"http://10.0.0.2:5000/upload";
     
     if (validInput)
     {
+        NSUserDefaults *deviceCache  = [NSUserDefaults standardUserDefaults];
+        NSString *myName = [deviceCache objectForKey:@"my_name"];
+        NSString *myID = [deviceCache objectForKey:@"my_id"];
+
         NSDictionary* params = [[NSDictionary alloc] initWithObjectsAndKeys:
                                 self.questionTextView.text, @"question",
-                                @"new", @"author_name",
-                                @(177), @"author_id",
+                                myName, @"author_name",
+                                myID, @"author_id",
                                 self.chosenImgView.image, @"image",
                                 nil];
         

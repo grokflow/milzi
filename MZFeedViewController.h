@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "MZTableViewCell.h"
+#import "MZNewUserViewController.h"
 
 @interface MZFeedViewController : UITableViewController
 

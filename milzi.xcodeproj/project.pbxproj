@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		815801621BE294D500CE39F9 /* MZNewUserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 815801611BE294D500CE39F9 /* MZNewUserViewController.m */; };
 		816DB5461BD018120027BC68 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 816DB5451BD018120027BC68 /* main.m */; };
 		816DB5491BD018120027BC68 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 816DB5481BD018120027BC68 /* AppDelegate.m */; };
 		816DB5511BD018120027BC68 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 816DB5501BD018120027BC68 /* Assets.xcassets */; };
@@ -38,6 +39,8 @@
 
 /* Begin PBXFileReference section */
 		70CE4CEB3F02404193218FAF /* Pods-milzi.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-milzi.debug.xcconfig"; path = "Pods/Target Support Files/Pods-milzi/Pods-milzi.debug.xcconfig"; sourceTree = "<group>"; };
+		815801601BE294D500CE39F9 /* MZNewUserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZNewUserViewController.h; sourceTree = "<group>"; };
+		815801611BE294D500CE39F9 /* MZNewUserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MZNewUserViewController.m; sourceTree = "<group>"; };
 		816DB5411BD018120027BC68 /* milzi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = milzi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		816DB5451BD018120027BC68 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		816DB5471BD018120027BC68 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -129,6 +132,8 @@
 				81EBFCBF1BD98E9F00CA8482 /* placeholder.png */,
 				816DB5471BD018120027BC68 /* AppDelegate.h */,
 				816DB5481BD018120027BC68 /* AppDelegate.m */,
+				815801601BE294D500CE39F9 /* MZNewUserViewController.h */,
+				815801611BE294D500CE39F9 /* MZNewUserViewController.m */,
 				816DB5501BD018120027BC68 /* Assets.xcassets */,
 				816DB5551BD018120027BC68 /* Info.plist */,
 				816DB5441BD018120027BC68 /* Supporting Files */,
@@ -355,6 +360,7 @@
 				816DB5491BD018120027BC68 /* AppDelegate.m in Sources */,
 				81A454881BD16607007119A7 /* MZFeedViewController.m in Sources */,
 				81EDB10E1BD6BCBB00491320 /* MZTableViewCell.m in Sources */,
+				815801621BE294D500CE39F9 /* MZNewUserViewController.m in Sources */,
 				816DB5461BD018120027BC68 /* main.m in Sources */,
 				817546251BDFDCC000EE0E78 /* MZAddPollViewController.m in Sources */,
 			);
