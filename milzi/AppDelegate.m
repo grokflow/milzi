@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import "MZFeedViewController.h"
 #import "MZAddPollViewController.h"
+#import "MZMyItemsViewController.h"
 
 @interface AppDelegate ()
 
@@ -24,22 +25,26 @@
 
     MZFeedViewController *feedViewController = [[MZFeedViewController alloc] init];
     MZAddPollViewController *addPollViewController = [[MZAddPollViewController alloc] init];
-
+    MZMyItemsViewController *myItemsViewController = [[MZMyItemsViewController alloc] init];
+    
     UINavigationController *feedNavigationController = [[UINavigationController alloc] initWithRootViewController:feedViewController];
     feedNavigationController.tabBarItem.title = @"feed";
 
     UINavigationController *pollNavigationController = [[UINavigationController alloc] initWithRootViewController:addPollViewController];
     pollNavigationController.tabBarItem.title = @"add";
     
-    
-    NSMutableArray *localViewControllersArray = [[NSMutableArray alloc] initWithObjects:feedNavigationController, pollNavigationController, nil];
+    UINavigationController *myStuffNavigationController = [[UINavigationController alloc] initWithRootViewController:myItemsViewController];
+    myStuffNavigationController.tabBarItem.title = @"mine";
+
+    NSMutableArray *localViewControllersArray = [[NSMutableArray alloc] initWithObjects:feedNavigationController,
+                                                 pollNavigationController,
+                                                 myStuffNavigationController,
+                                                 nil];
 
     tabBars.viewControllers = localViewControllersArray;
     tabBars.view.autoresizingMask=(UIViewAutoresizingFlexibleHeight);
     self.window.rootViewController = tabBars;
-    
-   // self.window.rootViewController = navigationController;
-    
+        
     // Override point for customization after application launch
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
