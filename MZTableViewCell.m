@@ -10,10 +10,11 @@
 #define kHorizontalInsets      15.0f
 #define kVerticalInsets        10.0f
 
+#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 
 @interface MZTableViewCell ()
 @property (nonatomic, assign) BOOL didSetupConstraints;
-@property (nonatomic, strong) UIView* cellSeparator;
+@property (nonatomic, strong) UIView *cellSeparator;
 
 @end
 
@@ -40,7 +41,8 @@
 
         self.yesButton = [UIButton newAutoLayoutView];
         [self.yesButton setTitle:@"Yes" forState:UIControlStateNormal];
-        self.yesButton.backgroundColor = [UIColor lightGrayColor];
+        //self.yesButton.backgroundColor = [UIColor lightGrayColor];
+        self.yesButton.backgroundColor = UIColorFromRGB(0xA7DBD8);
         self.yesButton.layer.borderColor = [UIColor whiteColor].CGColor;
         self.yesButton.layer.borderWidth = 2.5f;
         self.yesButton.clipsToBounds = YES;
@@ -48,7 +50,7 @@
         self.noButton = [UIButton newAutoLayoutView];
         [self.noButton setTitle:@"No" forState:UIControlStateNormal];
         self.noButton.layer.borderColor = [UIColor whiteColor].CGColor;
-        self.noButton.backgroundColor = [UIColor lightGrayColor];
+        self.noButton.backgroundColor = UIColorFromRGB(0xA7DBD8);
         self.noButton.layer.borderWidth = 2.5f;
         self.noButton.clipsToBounds = YES;
         
@@ -58,7 +60,7 @@
         self.voteCountLabel.text = @"votes";
         
         self.cellSeparator = [UIView newAutoLayoutView];
-        self.cellSeparator.backgroundColor = [UIColor lightGrayColor];
+        self.cellSeparator.backgroundColor = UIColorFromRGB(0xE0E4CC);//0xe7e7e7);
         
         [self.contentView addSubview:self.questionLabel];
         [self.contentView addSubview:self.nameLabel];
@@ -72,10 +74,12 @@
     }
     return self;
 }
+
 - (void)updateFonts
 {
     self.questionLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
-    self.nameLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleCaption2];
+    self.voteCountLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleCaption1];
+    self.nameLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleCaption1];
 }
 
 - (void)updateConstraints
@@ -122,6 +126,7 @@
     
     [super updateConstraints];
 }
+
 - (void)layoutSubviews {
     [super layoutSubviews];
     
@@ -140,6 +145,5 @@
     self.yesButton.userInteractionEnabled = YES;
     self.noButton.userInteractionEnabled = YES;
 }
-
 
 @end

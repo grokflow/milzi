@@ -8,10 +8,12 @@
 
 #import "MZAddPollViewController.h"
 
+#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
+
 #define kHorizontalInsets      15.0f
 #define kVerticalInsets        10.0f
 const long int MAX_CHAR_COUNT = 100;
-NSString *POST_URL_STRING = @"http://10.0.0.2:5000/upload";
+NSString *POST_URL_STRING = @"http://192.168.1.125:5000/upload";
 
 @interface MZAddPollViewController ()
 
@@ -38,17 +40,27 @@ NSString *POST_URL_STRING = @"http://10.0.0.2:5000/upload";
 {
     [self.navigationItem setTitle:@"New Poll"];
     self.edgesForExtendedLayout = UIRectEdgeNone; //because label would go under navigaton bar
-    
-    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
-                                                                                target:self
+    self.navigationController.navigationBar.barTintColor = UIColorFromRGB(0x69D2E7);//FA6900);
+
+    [self.navigationController.navigationBar
+     setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor],
+                              NSFontAttributeName: [UIFont systemFontOfSize:20.0f]}];
+
+    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+
+    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone                                                                                      target:self
                                                                                 action:@selector(submitPoll)];
     
-    UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+    doneButton.tintColor = UIColorFromRGB(0xF9A369);
+    UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain
                                                                                   target:self
                                                                                   action:@selector(goToFeedView)];
+    cancelButton.tintColor = UIColorFromRGB(0xF9A369);
     self.navigationItem.rightBarButtonItem = doneButton;
     self.navigationItem.leftBarButtonItem = cancelButton;
 }
+
+
 
 - (void)setupUIViews
 {
@@ -78,7 +90,7 @@ NSString *POST_URL_STRING = @"http://10.0.0.2:5000/upload";
     self.chosenImgView.contentMode = UIViewContentModeScaleAspectFill;
     
     self.buttonsView  = [UIView newAutoLayoutView];
-    self.buttonsView.backgroundColor = [UIColor greenColor];
+    self.buttonsView.backgroundColor = UIColorFromRGB(0xF38630);
     
     self.selectImgBtn = [UIButton newAutoLayoutView];
     [self.selectImgBtn setTitle:@"Choose Photo" forState:UIControlStateNormal];
@@ -113,14 +125,33 @@ NSString *POST_URL_STRING = @"http://10.0.0.2:5000/upload";
 
 - (void)submitPoll
 {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Ooops!"
+                                                                   message:nil
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * action) {}];
+    
+    [alert addAction:defaultAction];
+    
     //checking input
     BOOL validInput = true;
     NSString *questionText = [self.questionTextView.text
                               stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    if ([questionText length] == 0)
+    
+    if ([questionText length] == 0 || [self.questionTextView.text isEqualToString:@"Enter your question..."])
+    {
         validInput = NO;
+        alert.message = @"You forgot to add your question";
+        [self presentViewController:alert animated:YES completion:nil];
+
+    }
     else if (self.chosenImgView.image == nil)
+    {
+        alert.message = @"You forgot to include your awesome photo";
+        [self presentViewController:alert animated:YES completion:nil];
         validInput = NO;
+    }
     
     if (validInput)
     {
@@ -136,6 +167,7 @@ NSString *POST_URL_STRING = @"http://10.0.0.2:5000/upload";
                                 nil];
         
         NSURL *requestURL = [NSURL URLWithString:POST_URL_STRING];
+        [JDStatusBarNotification showWithStatus:@"uploading your poll" styleName:JDStatusBarStyleWarning];
         [self sendPostRequestWithParameters:params toURL:requestURL];
     }
 }
@@ -143,15 +175,6 @@ NSString *POST_URL_STRING = @"http://10.0.0.2:5000/upload";
 - (void)goToFeedView
 {
     [self.tabBarController setSelectedIndex:0];
-    
-    //reset views
-    self.questionTextView.text = @"Enter your question...";
-    //because otherwise if the user cancels while typing and comes back to this view, the placeholder text won't appear
-    //since it is the first responser, it will call textViewDidBeginEditing and remove the placeholder text
-    [self dismissKeyboard];
-    self.questionTextView.textColor = [UIColor lightGrayColor];
-    self.questionCharCounterLabel.text = [NSString stringWithFormat:@"%ld", MAX_CHAR_COUNT];
-    self.chosenImgView.image = nil;
 }
 
 -(void)keyboardWillShow:(NSNotification *)notification
@@ -294,9 +317,10 @@ NSString *POST_URL_STRING = @"http://10.0.0.2:5000/upload";
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     UIImage *chosenImage = info[UIImagePickerControllerOriginalImage];
-    self.chosenImgView.image = chosenImage;
-    
+    //dismissing the controller before assigning solved didReceiveMemory warning as per stackoverflow suggestion
+    //http://stackoverflow.com/questions/1834128/memory-warning-after-using-the-uiimagepicker-once
     [picker dismissViewControllerAnimated:YES completion:NULL];
+    self.chosenImgView.image = chosenImage;
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
@@ -336,7 +360,8 @@ NSString *POST_URL_STRING = @"http://10.0.0.2:5000/upload";
     }
     
     // add image data
-    NSData *imageData = UIImageJPEGRepresentation(imageToPost, 0.5);
+    NSData *imageData = [self compressImage:imageToPost];
+    
     if (imageData) {
         [body appendData:[[NSString stringWithFormat:@"--%@\r\n", BoundaryConstant] dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"image.jpg\"\r\n", FileParamConstant] dataUsingEncoding:NSUTF8StringEncoding]];
@@ -360,13 +385,54 @@ NSString *POST_URL_STRING = @"http://10.0.0.2:5000/upload";
     
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     configuration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
-    NSURLSession* session = [NSURLSession sessionWithConfiguration:configuration];
+    NSURLSession* session = [NSURLSession sessionWithConfiguration:configuration delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
     
     NSURLSessionUploadTask *postDataTask = [session uploadTaskWithRequest:request fromData:body completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        NSLog(@"error: %@", [error userInfo]);
+        
+        if (error)
+        {
+            NSLog(@"error: %@", [error userInfo]);
+            [JDStatusBarNotification showWithStatus:@"didn't work, try again" dismissAfter:2.0 styleName:JDStatusBarStyleWarning];
+            [self.tabBarController setSelectedIndex:1];
+            
+        } else
+        {
+            [JDStatusBarNotification showWithStatus:@"success" dismissAfter:2.0 styleName:JDStatusBarStyleSuccess];
+            //reset views
+            self.questionTextView.text = @"Enter your question...";
+            //because otherwise if the user cancels while typing and comes back to this view, the placeholder text won't appear
+            //since it is the first responser, it will call textViewDidBeginEditing and remove the placeholder text
+            [self dismissKeyboard];
+            self.questionTextView.textColor = [UIColor lightGrayColor];
+            self.questionCharCounterLabel.text = [NSString stringWithFormat:@"%ld", MAX_CHAR_COUNT];
+            self.chosenImgView.image = nil;
+        }
     }];
     
     [postDataTask resume];
+
     [self goToFeedView];
+}
+
+- (NSData *)compressImage:(UIImage *)image{
+    float actualHeight = image.size.height;
+    float actualWidth = image.size.width;
+    float maxWidth = 1920; //iphone 6 resolution
+    float compressionQuality = 0.5;//50 percent compression
+    
+    if (actualWidth > maxWidth)
+    {
+        actualHeight = (maxWidth * actualHeight) / actualWidth;
+        actualWidth = maxWidth;
+    }
+    
+    CGRect rect = CGRectMake(0.0, 0.0, actualWidth, actualHeight);
+    UIGraphicsBeginImageContext(rect.size);
+    [image drawInRect:rect];
+    UIImage *img = UIGraphicsGetImageFromCurrentImageContext();
+    NSData *imageData = UIImageJPEGRepresentation(img, compressionQuality);
+    UIGraphicsEndImageContext();
+    
+    return imageData;
 }
 @end

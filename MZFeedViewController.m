@@ -8,9 +8,10 @@
 
 #import "MZFeedViewController.h"
 
-NSString *BASE_URL = @"http://10.0.0.2:5000/";
+#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
+
+NSString *BASE_URL = @"http://192.168.1.125:5000/";
 static NSString *CellIdentifier = @"MilZiCellID";
-NSURLSession *session;
 NSMutableArray *dataArray;
 NSUserDefaults *deviceCache;
 
@@ -27,7 +28,12 @@ NSUserDefaults *deviceCache;
     [super viewDidLoad];
     
     [self.navigationItem setTitle:@"milzi"];
-    
+    self.navigationController.navigationBar.barTintColor = UIColorFromRGB(0x69D2E7);//FA6900);
+    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+
+    [self.navigationController.navigationBar
+     setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor],
+                              NSFontAttributeName: [UIFont systemFontOfSize:28.0f]}];
     [self.tableView registerClass:[MZTableViewCell class] forCellReuseIdentifier:CellIdentifier];
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     self.tableView.estimatedRowHeight = 200.0;
@@ -36,16 +42,14 @@ NSUserDefaults *deviceCache;
     self.tableView.allowsSelection = NO;
     self.tableView.showsVerticalScrollIndicator = NO;
     
-    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-    configuration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
-    session = [NSURLSession sessionWithConfiguration:configuration];
     deviceCache = [NSUserDefaults standardUserDefaults];
-
+    
     dataArray = [[NSMutableArray alloc] init];
     [self getLatestUpdates];
     
     if ([deviceCache boolForKey:@"friend"] == NO)
     {
+        self.tabBarController.tabBar.userInteractionEnabled = NO;
         [self showNewUserScreen];
     }
     [self setupRefreshControl];
@@ -59,12 +63,12 @@ NSUserDefaults *deviceCache;
     
     self.navigationController.modalPresentationStyle = UIModalTransitionStyleCoverVertical;
     [self.navigationController presentViewController:newUserViewController animated:YES completion:nil];
-
+    
 }
 - (void) setupRefreshControl
 {
     self.refreshControl = [[UIRefreshControl alloc] init];
-    self.refreshControl.backgroundColor = [UIColor purpleColor];
+    self.refreshControl.backgroundColor = UIColorFromRGB(0xF38630);
     self.refreshControl.tintColor = [UIColor whiteColor];
     [self.refreshControl addTarget:self
                             action:@selector(getLatestUpdates)
@@ -75,42 +79,55 @@ NSUserDefaults *deviceCache;
     NSAttributedString *attributedTitle = [[NSAttributedString alloc] initWithString:@"grabbing more gems" attributes:attrsDictionary];
     self.refreshControl.attributedTitle = attributedTitle;
     
-
+    
 }
 - (void)getLatestUpdates
 {
-    NSURLSessionDataTask *dataTask = [session dataTaskWithURL:[NSURL URLWithString:BASE_URL] completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-        dataArray = [[NSMutableArray alloc] initWithArray:[json objectForKey:@"data"]];
-        dispatch_async(dispatch_get_main_queue(), ^{
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    configuration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
+    
+    NSURLSessionDataTask *dataTask = [session dataTaskWithURL:[NSURL URLWithString:BASE_URL]  completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (error)
+        {
+            NSLog(@"error: %@", error);
+            [self showErrorMessage:[NSString stringWithFormat:@"%@\nCheck your internet connection and pull to grab some gems", [error localizedDescription]]];
+            [self.refreshControl endRefreshing];
+            
+            
+        } else
+        {
+            NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+            dataArray = [[NSMutableArray alloc] initWithArray:[json objectForKey:@"data"]];
             [self.tableView reloadData];
             [self.refreshControl endRefreshing];
-
-        });
+        }
     }];
     [dataTask resume];
-
     
+}
+- (void)showErrorMessage:(NSString *)error
+{
+    UILabel *messageLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width - 50, self.view.bounds.size.height)];
+    
+    messageLabel.text = error;
+    messageLabel.textColor = [UIColor blackColor];
+    messageLabel.numberOfLines = 3;
+    messageLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    messageLabel.textAlignment = NSTextAlignmentCenter;
+    messageLabel.font = [UIFont systemFontOfSize:18];
+    
+    self.tableView.backgroundView = messageLabel;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
 }
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     if ([dataArray count])
     {
         return 1;
-        
     } else
     {
-        UILabel *messageLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height)];
-        
-        messageLabel.text = @"No data is currently available. Please pull down to refresh.";
-        messageLabel.textColor = [UIColor blackColor];
-        messageLabel.numberOfLines = 0;
-        messageLabel.textAlignment = NSTextAlignmentCenter;
-        messageLabel.font = [UIFont systemFontOfSize:20];
-        [messageLabel sizeToFit];
-        
-        self.tableView.backgroundView = messageLabel;
-        self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        [self showErrorMessage:@"No data is currently available. Please pull down to refresh."];
     }
     return 0;
 }
@@ -173,12 +190,12 @@ NSUserDefaults *deviceCache;
         if ([myVote isEqualToString:@"yes"])
         {
             ++yesVotes;
-            cell.yesButton.layer.borderColor = [UIColor redColor].CGColor;
+            cell.yesButton.layer.borderColor = UIColorFromRGB(0xF38630).CGColor;
         }
         else if ([myVote isEqualToString:@"no"])
         {
             ++noVotes;
-            cell.noButton.layer.borderColor = [UIColor redColor].CGColor;
+            cell.noButton.layer.borderColor = UIColorFromRGB(0xF38630).CGColor;
         }
         
         yesPercent = ((double)yesVotes / totalVotes) * 100.0f;
@@ -206,7 +223,7 @@ NSUserDefaults *deviceCache;
     [deviceCache setValue:@"yes" forKey:itemID];
     [deviceCache synchronize];
     
-    sender.layer.borderColor = [UIColor redColor].CGColor;
+    sender.layer.borderColor = UIColorFromRGB(0xF38630).CGColor;
     MZTableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:sender.tag inSection:0]];
     
     long int yesVotes = [[dict objectForKey:@"YesVotes"] integerValue] + 1;
@@ -228,7 +245,7 @@ NSUserDefaults *deviceCache;
     
     [deviceCache setValue:@"no" forKey:itemID];
     [deviceCache synchronize];
-    sender.layer.borderColor = [UIColor redColor].CGColor;
+    sender.layer.borderColor = UIColorFromRGB(0xF38630).CGColor;
     
     MZTableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:sender.tag inSection:0]];
     
@@ -245,6 +262,10 @@ NSUserDefaults *deviceCache;
 
 -(void)sendVotingRequestForID:(NSString *)ID andAction:(NSString *)action
 {
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    configuration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration];
+    
     NSURL *voteURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",BASE_URL, action]];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:voteURL
                                                            cachePolicy:NSURLRequestUseProtocolCachePolicy

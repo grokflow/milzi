@@ -29,12 +29,18 @@
     
     UINavigationController *feedNavigationController = [[UINavigationController alloc] initWithRootViewController:feedViewController];
     feedNavigationController.tabBarItem.title = @"feed";
+    feedNavigationController.tabBarItem.image = [UIImage imageNamed:@"globe_outline"];
 
+    
     UINavigationController *pollNavigationController = [[UINavigationController alloc] initWithRootViewController:addPollViewController];
     pollNavigationController.tabBarItem.title = @"add";
+    pollNavigationController.tabBarItem.image = [UIImage imageNamed:@"add"];
+
     
     UINavigationController *myStuffNavigationController = [[UINavigationController alloc] initWithRootViewController:myItemsViewController];
     myStuffNavigationController.tabBarItem.title = @"mine";
+    myStuffNavigationController.tabBarItem.image = [UIImage imageNamed:@"home_outline"];
+    
 
     NSMutableArray *localViewControllersArray = [[NSMutableArray alloc] initWithObjects:feedNavigationController,
                                                  pollNavigationController,
