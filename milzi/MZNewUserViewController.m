@@ -8,9 +8,6 @@
 
 #import "MZNewUserViewController.h"
 
-#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
-
-NSString *BASE_URL_ = @"http://192.168.1.125:5000/";
 
 @interface MZNewUserViewController ()
 
@@ -103,8 +100,7 @@ NSString *BASE_URL_ = @"http://192.168.1.125:5000/";
     {
         [self showErrorMessage:@"connecting..."];
         
-        NSURL *signupURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@adduser",BASE_URL_]];
-        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:signupURL
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:kAddUserURL]
                                                                cachePolicy:NSURLRequestUseProtocolCachePolicy
                                                            timeoutInterval:60.0];
         

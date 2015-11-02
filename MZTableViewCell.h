@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <SDWebImage/UIImageView+WebCache.h>
 #import "PureLayout.h"
+#import "Constants.h"
 
 
 @interface MZTableViewCell : UITableViewCell

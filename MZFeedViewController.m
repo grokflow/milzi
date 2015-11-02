@@ -8,18 +8,11 @@
 
 #import "MZFeedViewController.h"
 
-#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
-
-NSString *BASE_URL = @"http://192.168.1.125:5000/";
 static NSString *CellIdentifier = @"MilZiCellID";
 NSMutableArray *dataArray;
 NSUserDefaults *deviceCache;
 
 @class MZNewUserViewController;
-
-@interface MZFeedViewController ()
-
-@end
 
 @implementation MZFeedViewController
 
@@ -87,7 +80,7 @@ NSUserDefaults *deviceCache;
     configuration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
     NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
     
-    NSURLSessionDataTask *dataTask = [session dataTaskWithURL:[NSURL URLWithString:BASE_URL]  completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    NSURLSessionDataTask *dataTask = [session dataTaskWithURL:[NSURL URLWithString:kGetFeedURL]  completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error)
         {
             NSLog(@"error: %@", error);
@@ -153,7 +146,7 @@ NSUserDefaults *deviceCache;
     NSNumber *itemID = [dict objectForKey:@"ID"];
     NSString *author = [dict objectForKey:@"AuthorName"];
     NSString *question = [dict objectForKey:@"Question"];
-    NSString *imgURL = [NSString stringWithFormat:@"%@%@",BASE_URL, [dict objectForKey:@"ImgURL"]];
+    NSString *imgURL = [NSString stringWithFormat:@"%@%@",kServerURL, [dict objectForKey:@"ImgURL"]];
     
     long int yesVotes = [[dict objectForKey:@"YesVotes"] integerValue];
     long int noVotes = [[dict objectForKey:@"NoVotes"] integerValue];
@@ -266,7 +259,7 @@ NSUserDefaults *deviceCache;
     configuration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
     NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration];
     
-    NSURL *voteURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",BASE_URL, action]];
+    NSURL *voteURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kServerURL, action]];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:voteURL
                                                            cachePolicy:NSURLRequestUseProtocolCachePolicy
                                                        timeoutInterval:60.0];
