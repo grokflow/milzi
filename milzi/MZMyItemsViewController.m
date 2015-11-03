@@ -8,26 +8,20 @@
 
 #import "MZMyItemsViewController.h"
 
-
 static NSString *CellIdentifier = @"MilZiCellID";
 NSURLSession *_session;
 NSMutableArray *myDataArray;
 NSUserDefaults *_deviceCache;
 
-@interface MZMyItemsViewController ()
-
-@end
-
 @implementation MZMyItemsViewController
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
     _deviceCache = [NSUserDefaults standardUserDefaults];
     
     [self.navigationItem setTitle:[_deviceCache objectForKey:@"my_name"]];
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-    self.navigationController.navigationBar.barTintColor = UIColorFromRGB(0x69D2E7);//FA6900);
+    self.navigationController.navigationBar.barTintColor = UIColorFromRGB(0x69D2E7);
     
     [self.navigationController.navigationBar
      setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor],
@@ -51,7 +45,6 @@ NSUserDefaults *_deviceCache;
     [self setupRefreshControl];
 }
 
-
 - (void) setupRefreshControl
 {
     self.refreshControl = [[UIRefreshControl alloc] init];
@@ -65,8 +58,6 @@ NSUserDefaults *_deviceCache;
     
     NSAttributedString *attributedTitle = [[NSAttributedString alloc] initWithString:@"grabbing more of your gems" attributes:attrsDictionary];
     self.refreshControl.attributedTitle = attributedTitle;
-    
-    
 }
 
 - (void)showErrorMessage:(NSString *)error
@@ -101,68 +92,63 @@ NSUserDefaults *_deviceCache;
     
     
     NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        if (error)
-        {
+        if (error) {
             NSLog(@"error: %@", error);
             [self showErrorMessage:[NSString stringWithFormat:@"%@\nCheck your internet connection and pull to grab some gems", [error localizedDescription]]];
             [self.refreshControl endRefreshing];
             
-        } else
-        {
+        } else {
             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
             myDataArray = [[NSMutableArray alloc] initWithArray:[json objectForKey:@"data"]];
             [self.tableView reloadData];
             [self.refreshControl endRefreshing];
         }
     }];
+    
     [dataTask resume];
-    
-    
 }
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    if ([myDataArray count])
-    {
+    if ([myDataArray count]) {
         return 1;
-        
-    } else
-    {
+    } else {
         [self showErrorMessage: @"No data is currently available. Please pull down to refresh."];
     }
+    
     return 0;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return [myDataArray count];
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     [self configureCustomCell:(MZTableViewCell*)cell atIndexPath:indexPath];
     
     return cell;
 }
 
-- (void)configureCustomCell:(MZTableViewCell*)cell atIndexPath:(NSIndexPath *)indexPath
-{
+- (void)configureCustomCell:(MZTableViewCell*)cell atIndexPath:(NSIndexPath *)indexPath {
+    
     [cell updateFonts];
     
     NSDictionary *dict = [myDataArray objectAtIndex:indexPath.row];
     NSNumber *itemID = [dict objectForKey:@"ID"];
     NSString *author = [dict objectForKey:@"AuthorName"];
     NSString *question = [dict objectForKey:@"Question"];
-    NSString *imgURL = [NSString stringWithFormat:@"%@%@",kServerURL, [dict objectForKey:@"ImgURL"]];
+    NSString *imgURL = [NSString stringWithFormat:@"%@%@", kServerURL, [dict objectForKey:@"ImgURL"]];
     
-    long int yesVotes = [[dict objectForKey:@"YesVotes"] integerValue];
-    long int noVotes = [[dict objectForKey:@"NoVotes"] integerValue];
-    long int totalVotes = yesVotes + noVotes;
+    NSUInteger yesVotes = [[dict objectForKey:@"YesVotes"] integerValue];
+    NSUInteger noVotes = [[dict objectForKey:@"NoVotes"] integerValue];
+    NSUInteger totalVotes = yesVotes + noVotes;
     
     cell.questionLabel.text = question;
     cell.nameLabel.text = [NSString stringWithFormat:@"by %@", author];
     [cell.mainImageView sd_setImageWithURL:[NSURL URLWithString:imgURL]
-                          placeholderImage:[UIImage imageNamed:@"placeholder.png"]
+                          placeholderImage:[UIImage imageNamed:@"placeholder"]
                                  completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
                                      [cell setNeedsUpdateConstraints];
                                      [cell updateConstraintsIfNeeded];
@@ -178,20 +164,16 @@ NSUserDefaults *_deviceCache;
     
     NSString *myVote = [_deviceCache stringForKey:[itemID stringValue]];
     
-    if (myVote)
-    {
+    if (myVote) {
         //adding 1 to all the calculations since votes in this session are not reflected in the dictionary retrieved from the server since it is immutable.
         // this will skew the results by one when we sync with the server
         [cell disableCellButtons];
         double yesPercent, noPercent;
         ++totalVotes;
-        if ([myVote isEqualToString:@"yes"])
-        {
+        if ([myVote isEqualToString:@"yes"]) {
             ++yesVotes;
             cell.yesButton.layer.borderColor = UIColorFromRGB(0xF38630).CGColor;
-        }
-        else if ([myVote isEqualToString:@"no"])
-        {
+        } else if ([myVote isEqualToString:@"no"]) {
             ++noVotes;
             cell.noButton.layer.borderColor = UIColorFromRGB(0xF38630).CGColor;
         }
@@ -202,11 +184,9 @@ NSUserDefaults *_deviceCache;
         cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
     }
     
-    if (totalVotes == 0)
-    {
+    if (totalVotes == 0) {
         cell.voteCountLabel.text = @"Be the first to vote!";
-    } else
-    {
+    } else {
         cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes", totalVotes];
     }
     
@@ -214,8 +194,8 @@ NSUserDefaults *_deviceCache;
     [cell updateConstraintsIfNeeded];
 }
 
--(void)tappedYes:(UIButton *)sender
-{
+-(void)tappedYes:(UIButton *)sender {
+    
     //sender.tag has the cell's IndexPath.row
     NSMutableDictionary *dict = [myDataArray objectAtIndex:sender.tag];
     NSString *itemID = [[dict objectForKey:@"ID"] stringValue];
@@ -225,9 +205,9 @@ NSUserDefaults *_deviceCache;
     sender.layer.borderColor = UIColorFromRGB(0xF38630).CGColor;
     MZTableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:sender.tag inSection:0]];
     
-    long int yesVotes = [[dict objectForKey:@"YesVotes"] integerValue] + 1;
-    long int noVotes = [[dict objectForKey:@"NoVotes"] integerValue];
-    long int totalVotes = yesVotes + noVotes;
+    NSUInteger yesVotes = [[dict objectForKey:@"YesVotes"] integerValue] + 1;
+    NSUInteger noVotes = [[dict objectForKey:@"NoVotes"] integerValue];
+    NSUInteger totalVotes = yesVotes + noVotes;
     double yesPercent = ((double)yesVotes / totalVotes) * 100.0f;
     double noPercent = ((double)noVotes / totalVotes) * 100.0f;
     cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
@@ -236,8 +216,8 @@ NSUserDefaults *_deviceCache;
     [self sendVotingRequestForID:itemID andAction:@"upvote"];
 }
 
--(void)tappedNo:(UIButton *)sender
-{
+-(void)tappedNo:(UIButton *)sender {
+    
     //sender.tag has the cell's IndexPath.row
     NSMutableDictionary *dict = [myDataArray objectAtIndex:sender.tag];
     NSString *itemID = [[dict objectForKey:@"ID"] stringValue];
@@ -248,9 +228,9 @@ NSUserDefaults *_deviceCache;
     
     MZTableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:sender.tag inSection:0]];
     
-    long int yesVotes = [[dict objectForKey:@"YesVotes"] integerValue];
-    long int noVotes = [[dict objectForKey:@"NoVotes"] integerValue] + 1;
-    long int totalVotes = yesVotes + noVotes;
+    NSUInteger yesVotes = [[dict objectForKey:@"YesVotes"] integerValue];
+    NSUInteger noVotes = [[dict objectForKey:@"NoVotes"] integerValue] + 1;
+    NSUInteger totalVotes = yesVotes + noVotes;
     double yesPercent = ((double)yesVotes / totalVotes) * 100.0f;
     double noPercent = ((double)noVotes / totalVotes) * 100.0f;
     cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
@@ -259,8 +239,8 @@ NSUserDefaults *_deviceCache;
     [self sendVotingRequestForID:itemID andAction:@"downvote"];
 }
 
--(void)sendVotingRequestForID:(NSString *)ID andAction:(NSString *)action
-{
+-(void)sendVotingRequestForID:(NSString *)ID andAction:(NSString *)action {
+    
     NSURL *voteURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", kServerURL, action]];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:voteURL
                                                            cachePolicy:NSURLRequestUseProtocolCachePolicy
@@ -275,7 +255,5 @@ NSUserDefaults *_deviceCache;
     
     [postDataTask resume];
 }
-
-
 
 @end

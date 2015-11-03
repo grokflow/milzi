@@ -8,7 +8,7 @@
 
 #import "MZAddPollViewController.h"
 
-const long int MAX_CHAR_COUNT = 100;
+const NSUInteger MAX_CHAR_COUNT = 100;
 
 @interface MZAddPollViewController ()
 
@@ -22,8 +22,8 @@ const long int MAX_CHAR_COUNT = 100;
 @end
 
 @implementation MZAddPollViewController
-- (void)viewDidLoad
-{
+
+- (void)viewDidLoad {
     [super viewDidLoad];
     
     [self setupNavigationBar];
@@ -31,21 +31,24 @@ const long int MAX_CHAR_COUNT = 100;
     [self setupActionSelectors];
 }
 
-- (void)setupNavigationBar
-{
+- (void)goToFeedView {
+    [self.tabBarController setSelectedIndex:0];
+}
+
+#pragma mark - UI Setup
+
+- (void)setupNavigationBar {
+    
     [self.navigationItem setTitle:@"New Poll"];
     self.edgesForExtendedLayout = UIRectEdgeNone; //because label would go under navigaton bar
-    self.navigationController.navigationBar.barTintColor = UIColorFromRGB(0x69D2E7);//FA6900);
-
+    self.navigationController.navigationBar.barTintColor = UIColorFromRGB(0x69D2E7);
     [self.navigationController.navigationBar
      setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor],
                               NSFontAttributeName: [UIFont systemFontOfSize:20.0f]}];
-
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
 
     UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone                                                                                      target:self
                                                                                 action:@selector(submitPoll)];
-    
     doneButton.tintColor = UIColorFromRGB(0xF9A369);
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain
                                                                                   target:self
@@ -55,12 +58,9 @@ const long int MAX_CHAR_COUNT = 100;
     self.navigationItem.leftBarButtonItem = cancelButton;
 }
 
-
-
-- (void)setupUIViews
-{
-    CGSize screenRect = [[UIScreen mainScreen] bounds].size;
+- (void)setupUIViews {
     
+    CGSize screenRect = [[UIScreen mainScreen] bounds].size;
     self.questionCharCounterLabel = [[UILabel alloc]
                                      initWithFrame:CGRectMake(kHorizontalInsets/ 2, kVerticalInsets * 2,
                                                               2 * kHorizontalInsets, 2 * kVerticalInsets)];
@@ -101,128 +101,37 @@ const long int MAX_CHAR_COUNT = 100;
     [self.view addSubview:self.buttonsView];
 }
 
-- (void)setupActionSelectors
-{
+- (void)setupActionSelectors {
+    
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]
                                    initWithTarget:self
                                    action:@selector(dismissKeyboard)];
     
     [self.view addGestureRecognizer:tap];
+    
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     [center addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [center addObserver:self selector:@selector(keyboardWillHide) name:UIKeyboardWillHideNotification object:nil];
     
     [self.takeImageBtn addTarget:self action:@selector(takePhoto:) forControlEvents:UIControlEventTouchUpInside];
     [self.selectImgBtn addTarget:self action:@selector(selectPhoto:) forControlEvents:UIControlEventTouchUpInside];
-    
-    
 }
 
-- (void)submitPoll
-{
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Ooops!"
-                                                                   message:nil
-                                                            preferredStyle:UIAlertControllerStyleAlert];
+#pragma mark - UITextViewDelegate
+
+- (void)textViewDidBeginEditing:(UITextView *)textView {
     
-    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
-                                                          handler:^(UIAlertAction * action) {}];
-    
-    [alert addAction:defaultAction];
-    
-    //checking input
-    BOOL validInput = true;
-    NSString *questionText = [self.questionTextView.text
-                              stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    
-    if ([questionText length] == 0 || [self.questionTextView.text isEqualToString:@"Enter your question..."])
-    {
-        validInput = NO;
-        alert.message = @"You forgot to add your question";
-        [self presentViewController:alert animated:YES completion:nil];
-
-    }
-    else if (self.chosenImgView.image == nil)
-    {
-        alert.message = @"You forgot to include your awesome photo";
-        [self presentViewController:alert animated:YES completion:nil];
-        validInput = NO;
-    }
-    
-    if (validInput)
-    {
-        NSUserDefaults *deviceCache  = [NSUserDefaults standardUserDefaults];
-        NSString *myName = [deviceCache objectForKey:@"my_name"];
-        NSString *myID = [deviceCache objectForKey:@"my_id"];
-
-        NSDictionary* params = [[NSDictionary alloc] initWithObjectsAndKeys:
-                                self.questionTextView.text, @"question",
-                                myName, @"author_name",
-                                myID, @"author_id",
-                                self.chosenImgView.image, @"image",
-                                nil];
-        
-        NSURL *requestURL = [NSURL URLWithString:kAddPollURL];
-        [JDStatusBarNotification showWithStatus:@"uploading your poll" styleName:JDStatusBarStyleWarning];
-        [self sendPostRequestWithParameters:params toURL:requestURL];
-    }
-}
-
-- (void)goToFeedView
-{
-    [self.tabBarController setSelectedIndex:0];
-}
-
--(void)keyboardWillShow:(NSNotification *)notification
-{
-    NSDictionary *userInfo  = notification.userInfo;
-    NSTimeInterval duration = [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    UIViewAnimationCurve curve = [[userInfo objectForKey:UIKeyboardAnimationCurveUserInfoKey] intValue];
-    CGRect keyboardFrame = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    CGRect newButtonsViewFrame = self.buttonsView.frame;
-    double tabBarHeight = self.tabBarController.tabBar.bounds.size.height;
-    
-    newButtonsViewFrame.origin.y = keyboardFrame.origin.y - newButtonsViewFrame.size.height - tabBarHeight;
-    
-    [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | curve animations:^{
-        self.buttonsView.frame = newButtonsViewFrame;
-        [self.buttonsView autoPinEdgeToSuperviewEdge:ALEdgeBottom withInset:keyboardFrame.size.height - tabBarHeight];
-    } completion:nil];
-}
-
--(void)keyboardWillHide
-{
-    //removing and readding the view to break the purelayout autolayout contsraints
-    [self.buttonsView removeFromSuperview];
-    [self.view addSubview:self.buttonsView];
-    [self.buttonsView autoPinEdgesToSuperviewEdgesWithInsets:UIEdgeInsetsZero excludingEdge:ALEdgeTop];
-    [self.buttonsView autoMatchDimension:ALDimensionHeight toDimension:ALDimensionHeight ofView:self.selectImgBtn];
-}
-
-- (void)viewDidLayoutSubviews
-{
-    [super viewDidLayoutSubviews];
-    [self updateSubviewsConstraints];
-}
-
--(void)dismissKeyboard
-{
-    [self.questionTextView resignFirstResponder];
-}
-
-- (void)textViewDidBeginEditing:(UITextView *)textView
-{
-    if ([textView.text isEqualToString:@"Enter your question..."])
-    {
+    if ([textView.text isEqualToString:@"Enter your question..."]) {
         textView.text = @"";
         textView.textColor = [UIColor blackColor]; //optional
     }
+    
     [textView becomeFirstResponder];
 }
 
-- (void)textViewDidEndEditing:(UITextView *)textView
-{
-    if ([textView.text isEqualToString:@""])
-    {
+- (void)textViewDidEndEditing:(UITextView *)textView {
+    
+    if ([textView.text isEqualToString:@""]) {
         textView.text = @"Enter your question...";
         textView.textColor = [UIColor lightGrayColor]; //optional
     }
@@ -230,8 +139,7 @@ const long int MAX_CHAR_COUNT = 100;
     [textView resignFirstResponder];
 }
 
-- (void)textViewDidChange:(UITextView *)textView
-{
+- (void)textViewDidChange:(UITextView *)textView {
     //character count
     long int len = textView.text.length;
     self.questionCharCounterLabel.text=[NSString stringWithFormat:@"%ld", MAX_CHAR_COUNT - len];
@@ -245,12 +153,11 @@ const long int MAX_CHAR_COUNT = 100;
     textView.frame = newFrame;
 }
 
-- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
-{
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+    
     self.questionCharCounterLabel.textColor = [UIColor lightGrayColor];
     
-    if ([textView.text length] + [text length] > MAX_CHAR_COUNT)
-    {
+    if ([textView.text length] + [text length] > MAX_CHAR_COUNT) {
         self.questionCharCounterLabel.textColor = [UIColor redColor];
         return NO;
     }
@@ -258,8 +165,14 @@ const long int MAX_CHAR_COUNT = 100;
     return YES;
 }
 
-- (void)updateSubviewsConstraints
-{
+#pragma mark - AutoLayout
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    [self updateSubviewsConstraints];
+}
+
+- (void)updateSubviewsConstraints {
+    
     if (!self.didSetupConstraints) {
         
         [self.chosenImgView autoPinEdge:ALEdgeTop
@@ -291,8 +204,40 @@ const long int MAX_CHAR_COUNT = 100;
     }
 }
 
-- (void)takePhoto:(UIButton *)sender
-{
+#pragma mark - Keyboard Events
+-(void)keyboardWillShow:(NSNotification *)notification {
+    
+    NSDictionary *userInfo  = notification.userInfo;
+    NSTimeInterval duration = [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    UIViewAnimationCurve curve = [[userInfo objectForKey:UIKeyboardAnimationCurveUserInfoKey] intValue];
+    CGRect keyboardFrame = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    CGRect newButtonsViewFrame = self.buttonsView.frame;
+    double tabBarHeight = self.tabBarController.tabBar.bounds.size.height;
+    
+    newButtonsViewFrame.origin.y = keyboardFrame.origin.y - newButtonsViewFrame.size.height - tabBarHeight;
+    
+    [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | curve animations:^{
+        self.buttonsView.frame = newButtonsViewFrame;
+        [self.buttonsView autoPinEdgeToSuperviewEdge:ALEdgeBottom withInset:keyboardFrame.size.height - tabBarHeight];
+    } completion:nil];
+}
+
+-(void)keyboardWillHide {
+    //removing and readding the view to break the purelayout autolayout contsraints
+    [self.buttonsView removeFromSuperview];
+    [self.view addSubview:self.buttonsView];
+    [self.buttonsView autoPinEdgesToSuperviewEdgesWithInsets:UIEdgeInsetsZero excludingEdge:ALEdgeTop];
+    [self.buttonsView autoMatchDimension:ALDimensionHeight toDimension:ALDimensionHeight ofView:self.selectImgBtn];
+}
+
+-(void)dismissKeyboard {
+    [self.questionTextView resignFirstResponder];
+}
+
+#pragma mark - Poll photo selection
+
+- (void)takePhoto:(UIButton *)sender {
+    
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.delegate = self;
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
@@ -300,8 +245,8 @@ const long int MAX_CHAR_COUNT = 100;
     [self presentViewController:picker animated:YES completion:NULL];
 }
 
-- (void)selectPhoto:(UIButton *)sender
-{
+- (void)selectPhoto:(UIButton *)sender {
+    
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.delegate = self;
     picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
@@ -309,8 +254,10 @@ const long int MAX_CHAR_COUNT = 100;
     [self presentViewController:picker animated:YES completion:NULL];
 }
 
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
-{
+#pragma  mark - UIImagePickerControllerDelegate 
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+    
     UIImage *chosenImage = info[UIImagePickerControllerOriginalImage];
     //dismissing the controller before assigning solved didReceiveMemory warning as per stackoverflow suggestion
     //http://stackoverflow.com/questions/1834128/memory-warning-after-using-the-uiimagepicker-once
@@ -318,13 +265,57 @@ const long int MAX_CHAR_COUNT = 100;
     self.chosenImgView.image = chosenImage;
 }
 
-- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
-{
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
     [picker dismissViewControllerAnimated:YES completion:NULL];
 }
 
-- (void)sendPostRequestWithParameters:(NSDictionary*)params toURL:(NSURL*)requestURL
-{
+#pragma  mark - Poll data preparation & submission
+
+- (void)submitPoll {
+    
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Ooops!"
+                                                                   message:nil
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * action) {}];
+    [alert addAction:defaultAction];
+    
+    //checking input
+    BOOL validInput = true;
+    NSString *questionText = [self.questionTextView.text
+                              stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    
+    if ([questionText length] == 0 || [self.questionTextView.text isEqualToString:@"Enter your question..."]) {
+        validInput = NO;
+        alert.message = @"You forgot to add your question";
+        [self presentViewController:alert animated:YES completion:nil];
+        
+    } else if (self.chosenImgView.image == nil) {
+        alert.message = @"You forgot to include your awesome photo";
+        [self presentViewController:alert animated:YES completion:nil];
+        validInput = NO;
+    }
+    
+    if (validInput) {
+        NSUserDefaults *deviceCache  = [NSUserDefaults standardUserDefaults];
+        NSString *myName = [deviceCache objectForKey:@"my_name"];
+        NSString *myID = [deviceCache objectForKey:@"my_id"];
+        
+        NSDictionary* params = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                self.questionTextView.text, @"question",
+                                myName, @"author_name",
+                                myID, @"author_id",
+                                self.chosenImgView.image, @"image",
+                                nil];
+        
+        NSURL *requestURL = [NSURL URLWithString:kAddPollURL];
+        [JDStatusBarNotification showWithStatus:@"uploading your poll" styleName:JDStatusBarStyleWarning];
+        [self sendPostRequestWithParameters:params toURL:requestURL];
+    }
+}
+
+- (void)sendPostRequestWithParameters:(NSDictionary*)params toURL:(NSURL*)requestURL {
+    
     UIImage *imageToPost = [params objectForKey:@"image"];
     
     // the boundary string : a random string, that will not repeat in post data, to separate post data fields.
@@ -384,14 +375,11 @@ const long int MAX_CHAR_COUNT = 100;
     
     NSURLSessionUploadTask *postDataTask = [session uploadTaskWithRequest:request fromData:body completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         
-        if (error)
-        {
+        if (error) {
             NSLog(@"error: %@", [error userInfo]);
             [JDStatusBarNotification showWithStatus:@"didn't work, try again" dismissAfter:2.0 styleName:JDStatusBarStyleWarning];
             [self.tabBarController setSelectedIndex:1];
-            
-        } else
-        {
+        } else {
             [JDStatusBarNotification showWithStatus:@"success" dismissAfter:2.0 styleName:JDStatusBarStyleSuccess];
             //reset views
             self.questionTextView.text = @"Enter your question...";
@@ -405,18 +393,17 @@ const long int MAX_CHAR_COUNT = 100;
     }];
     
     [postDataTask resume];
-
     [self goToFeedView];
 }
 
-- (NSData *)compressImage:(UIImage *)image{
+- (NSData *)compressImage:(UIImage *)image {
+    
     float actualHeight = image.size.height;
     float actualWidth = image.size.width;
     float maxWidth = 1920; //iphone 6 resolution
     float compressionQuality = 0.5;//50 percent compression
     
-    if (actualWidth > maxWidth)
-    {
+    if (actualWidth > maxWidth) {
         actualHeight = (maxWidth * actualHeight) / actualWidth;
         actualWidth = maxWidth;
     }
@@ -430,4 +417,7 @@ const long int MAX_CHAR_COUNT = 100;
     
     return imageData;
 }
+
+
+
 @end

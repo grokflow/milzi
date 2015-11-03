@@ -19,6 +19,11 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    //Caching
+    SDImageCache *sharedCache = [SDImageCache sharedImageCache];
+    sharedCache.maxCacheAge = k7DaysInSeconds;
+    
     // Override point for customization after application launch.
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     UITabBarController *tabBars = [[UITabBarController alloc] init];

@@ -9,15 +9,16 @@
 #import "MZTableViewCell.h"
 
 @interface MZTableViewCell ()
+
 @property (nonatomic, assign) BOOL didSetupConstraints;
 @property (nonatomic, strong) UIView *cellSeparator;
 
 @end
 
-
 @implementation MZTableViewCell
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
-{
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     
     if (self) {
@@ -37,7 +38,6 @@
 
         self.yesButton = [UIButton newAutoLayoutView];
         [self.yesButton setTitle:@"Yes" forState:UIControlStateNormal];
-        //self.yesButton.backgroundColor = [UIColor lightGrayColor];
         self.yesButton.backgroundColor = UIColorFromRGB(0xA7DBD8);
         self.yesButton.layer.borderColor = [UIColor whiteColor].CGColor;
         self.yesButton.layer.borderWidth = 2.5f;
@@ -56,7 +56,7 @@
         self.voteCountLabel.text = @"votes";
         
         self.cellSeparator = [UIView newAutoLayoutView];
-        self.cellSeparator.backgroundColor = UIColorFromRGB(0xE0E4CC);//0xe7e7e7);
+        self.cellSeparator.backgroundColor = UIColorFromRGB(0xE0E4CC);
         
         [self.contentView addSubview:self.questionLabel];
         [self.contentView addSubview:self.nameLabel];
@@ -68,18 +68,19 @@
         
         [self updateFonts];
     }
+    
     return self;
 }
 
-- (void)updateFonts
-{
+- (void)updateFonts {
+    
     self.questionLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
     self.voteCountLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleCaption1];
     self.nameLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleCaption1];
 }
 
-- (void)updateConstraints
-{
+- (void)updateConstraints {
+    
     CGSize screenRect = [[UIScreen mainScreen] bounds].size;
     
     if (!self.didSetupConstraints) {
@@ -109,7 +110,6 @@
         [self.noButton autoSetDimension:ALDimensionHeight toSize:screenRect.width * 0.15];
         [self.noButton autoSetDimension:ALDimensionWidth toSize:screenRect.width * 0.15];
 
-
         [self.voteCountLabel autoPinEdge:ALEdgeTop toEdge:ALEdgeBottom ofView:self.mainImageView withOffset:kVerticalInsets];
         [self.voteCountLabel autoPinEdgeToSuperviewEdge:ALEdgeLeft withInset:kHorizontalInsets];
         
@@ -130,14 +130,12 @@
     self.yesButton.layer.cornerRadius = floor(self.yesButton.bounds.size.width / 2.0);
 }
 
-- (void)disableCellButtons
-{
+- (void)disableCellButtons {
     self.yesButton.userInteractionEnabled = NO;
     self.noButton.userInteractionEnabled = NO;
 }
 
-- (void)enableCellButtons
-{
+- (void)enableCellButtons {
     self.yesButton.userInteractionEnabled = YES;
     self.noButton.userInteractionEnabled = YES;
 }
