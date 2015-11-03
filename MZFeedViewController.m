@@ -9,23 +9,20 @@
 #import "MZFeedViewController.h"
 
 static NSString *CellIdentifier = @"MilZiCellID";
-NSMutableArray *dataArray;
-NSUserDefaults *deviceCache;
-
-@class MZNewUserViewController;
 
 @implementation MZFeedViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self.navigationItem setTitle:@"milzi"];
+    [self.navigationItem setTitle:self.navBarTitleString];
+
     self.navigationController.navigationBar.barTintColor = UIColorFromRGB(0x69D2E7);
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     
     [self.navigationController.navigationBar
      setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor],
-                              NSFontAttributeName: [UIFont systemFontOfSize:28.0f]}];
+                              NSFontAttributeName: [UIFont systemFontOfSize:22.0f]}];
     
     [self.tableView registerClass:[MZTableViewCell class] forCellReuseIdentifier:CellIdentifier];
     self.tableView.rowHeight = UITableViewAutomaticDimension;
@@ -35,15 +32,10 @@ NSUserDefaults *deviceCache;
     self.tableView.allowsSelection = NO;
     self.tableView.showsVerticalScrollIndicator = NO;
     
-    deviceCache = [NSUserDefaults standardUserDefaults];
+    self.deviceCache = [NSUserDefaults standardUserDefaults];
     
-    dataArray = [[NSMutableArray alloc] init];
+    self.dataArray = [[NSMutableArray alloc] init];
     [self getLatestUpdates];
-    
-    if ([deviceCache boolForKey:@"friend"] == NO) {
-        self.tabBarController.tabBar.userInteractionEnabled = NO;
-        [self showNewUserScreen];
-    }
     
     [self setupRefreshControl];
 }
@@ -52,7 +44,7 @@ NSUserDefaults *deviceCache;
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     
-    if ([dataArray count]) {
+    if ([self.dataArray count]) {
         return 1;
     } else {
         [self showErrorMessage:@"No data is currently available. Please pull down to refresh."];
@@ -62,7 +54,7 @@ NSUserDefaults *deviceCache;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [dataArray count];
+    return [self.dataArray count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -78,7 +70,7 @@ NSUserDefaults *deviceCache;
 - (void)configureCustomCell:(MZTableViewCell*)cell atIndexPath:(NSIndexPath *)indexPath {
     [cell updateFonts];
     
-    NSDictionary *dict = [dataArray objectAtIndex:indexPath.row];
+    NSDictionary *dict = [self.dataArray objectAtIndex:indexPath.row];
     NSNumber *itemID = [dict objectForKey:@"ID"];
     NSString *author = [dict objectForKey:@"AuthorName"];
     NSString *question = [dict objectForKey:@"Question"];
@@ -105,7 +97,7 @@ NSUserDefaults *deviceCache;
     [cell.yesButton addTarget:self action:@selector(tappedYes:) forControlEvents:UIControlEventTouchUpInside];
     [cell.noButton addTarget:self action:@selector(tappedNo:) forControlEvents:UIControlEventTouchUpInside];
     
-    NSString *myVote = [deviceCache stringForKey:[itemID stringValue]];
+    NSString *myVote = [self.self.deviceCache stringForKey:[itemID stringValue]];
     
     if (myVote) {
         //adding 1 to all the calculations since votes in this session are not reflected in the dictionary retrieved from the server since it is immutable.
@@ -140,10 +132,10 @@ NSUserDefaults *deviceCache;
 -(void)tappedYes:(UIButton *)sender {
     
     //sender.tag has the cell's IndexPath.row
-    NSMutableDictionary *dict = [dataArray objectAtIndex:sender.tag];
+    NSMutableDictionary *dict = [self.dataArray objectAtIndex:sender.tag];
     NSString *itemID = [[dict objectForKey:@"ID"] stringValue];
-    [deviceCache setValue:@"yes" forKey:itemID];
-    [deviceCache synchronize];
+    [self.self.deviceCache setValue:@"yes" forKey:itemID];
+    [self.self.deviceCache synchronize];
     
     sender.layer.borderColor = UIColorFromRGB(0xF38630).CGColor;
     MZTableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:sender.tag inSection:0]];
@@ -162,11 +154,11 @@ NSUserDefaults *deviceCache;
 -(void)tappedNo:(UIButton *)sender {
     
     //sender.tag has the cell's IndexPath.row
-    NSMutableDictionary *dict = [dataArray objectAtIndex:sender.tag];
+    NSMutableDictionary *dict = [self.dataArray objectAtIndex:sender.tag];
     NSString *itemID = [[dict objectForKey:@"ID"] stringValue];
     
-    [deviceCache setValue:@"no" forKey:itemID];
-    [deviceCache synchronize];
+    [self.self.deviceCache setValue:@"no" forKey:itemID];
+    [self.deviceCache synchronize];
     sender.layer.borderColor = UIColorFromRGB(0xF38630).CGColor;
     
     MZTableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:sender.tag inSection:0]];
@@ -183,28 +175,6 @@ NSUserDefaults *deviceCache;
 }
 
 #pragma mark - Network Calls
-
-- (void)getLatestUpdates {
-    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-    configuration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
-    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
-    
-    NSURLSessionDataTask *dataTask = [session dataTaskWithURL:[NSURL URLWithString:kGetFeedURL]  completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        if (error) {
-            NSLog(@"error: %@", error);
-            [self showErrorMessage:[NSString stringWithFormat:@"%@\nCheck your internet connection and pull to grab some gems", [error localizedDescription]]];
-            [self.refreshControl endRefreshing];
-            
-        } else {
-            NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-            dataArray = [[NSMutableArray alloc] initWithArray:[json objectForKey:@"data"]];
-            [self.tableView reloadData];
-            [self.refreshControl endRefreshing];
-        }
-    }];
-    
-    [dataTask resume];
-}
 
 -(void)sendVotingRequestForID:(NSString *)ID andAction:(NSString *)action {
     
@@ -229,17 +199,6 @@ NSUserDefaults *deviceCache;
 
 #pragma mark - UI Utilities
 
-- (void)showNewUserScreen {
-    
-    MZNewUserViewController *newUserViewController = [[MZNewUserViewController alloc] init];
-    newUserViewController.modalPresentationStyle = UIModalPresentationOverCurrentContext;
-    newUserViewController.feedVC = self;
-    
-    self.navigationController.modalPresentationStyle = UIModalTransitionStyleCoverVertical;
-    [self.navigationController presentViewController:newUserViewController animated:YES completion:nil];
-    
-}
-
 - (void) setupRefreshControl {
     
     self.refreshControl = [[UIRefreshControl alloc] init];
@@ -251,7 +210,7 @@ NSUserDefaults *deviceCache;
     NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObject:[UIColor whiteColor]
                                                                 forKey:NSForegroundColorAttributeName];
     
-    NSAttributedString *attributedTitle = [[NSAttributedString alloc] initWithString:@"grabbing more gems" attributes:attrsDictionary];
+    NSAttributedString *attributedTitle = [[NSAttributedString alloc] initWithString:self.refreshControlMessage attributes:attrsDictionary];
     self.refreshControl.attributedTitle = attributedTitle;
 }
 

@@ -8,8 +8,10 @@
 
 #import <UIKit/UIKit.h>
 #import "MZTableViewCell.h"
+#import "MZFeedViewController.h"
 #import "Constants.h"
 
-@interface MZMyItemsViewController : UITableViewController
+//@interface MZMyItemsViewController : UITableViewController
+@interface MZMyItemsViewController : MZFeedViewController
 
 @end

@@ -7,13 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "MZFeedViewController.h"
+#import "MZHomeFeedViewController.h"
 #import "PureLayout.h"
 #import "Constants.h"
 
-@class MZFeedViewController;
+@class MZHomeFeedViewController;
 
 @interface MZNewUserViewController : UIViewController
 
-@property (weak, nonatomic) MZFeedViewController* feedVC;
+@property (weak, nonatomic) MZHomeFeedViewController* feedVC;
 @end

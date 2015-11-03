@@ -7,9 +7,8 @@
 //
 
 #import "AppDelegate.h"
-#import "MZFeedViewController.h"
-#import "MZAddPollViewController.h"
-#import "MZMyItemsViewController.h"
+
+
 
 @interface AppDelegate ()
 
@@ -28,11 +27,11 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     UITabBarController *tabBars = [[UITabBarController alloc] init];
 
-    MZFeedViewController *feedViewController = [[MZFeedViewController alloc] init];
+    MZHomeFeedViewController *homeFeedViewController = [[MZHomeFeedViewController alloc] init];
     MZAddPollViewController *addPollViewController = [[MZAddPollViewController alloc] init];
     MZMyItemsViewController *myItemsViewController = [[MZMyItemsViewController alloc] init];
     
-    UINavigationController *feedNavigationController = [[UINavigationController alloc] initWithRootViewController:feedViewController];
+    UINavigationController *feedNavigationController = [[UINavigationController alloc] initWithRootViewController:homeFeedViewController];
     feedNavigationController.tabBarItem.title = @"feed";
     feedNavigationController.tabBarItem.image = [UIImage imageNamed:@"globe_outline"];
 

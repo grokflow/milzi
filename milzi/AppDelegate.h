@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 #import <SDImageCache.h>
+#import "MZFeedViewController.h"
+#import "MZAddPollViewController.h"
+#import "MZMyItemsViewController.h"
+#import "MZHomeFeedViewController.h"
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
