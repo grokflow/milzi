@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>JDStatusBarNotification.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Pods-milzi.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -22,17 +27,22 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>095B3939D87725466C4E2180BA98DC9E</key>
+		<key>405176376173A13BA4DEBA83919B6C16</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>655FC206B3462D60BDB258050DB1A62E</key>
+		<key>A8DB5326E6191C50072BE397372A7004</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>7EB7A466356942BD8A00DEA1F32B3F4F</key>
+		<key>EF62A7B046CE536F2C1EB886D38817C9</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>FF5CFD6F2B044B2583AE363E38A9D0EF</key>
 		<dict>
 			<key>primary</key>
 			<true/>

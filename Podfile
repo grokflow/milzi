@@ -7,6 +7,9 @@ target 'milzi' do
 
 pod 'PureLayout'
 pod 'SDWebImage', '~>3.7'
+pod 'JDStatusBarNotification'
+
+
 end
 
 target 'milziTests' do
