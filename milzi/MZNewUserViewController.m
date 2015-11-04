@@ -20,6 +20,7 @@
 
 @implementation MZNewUserViewController
 
+#pragma mark - UI
 - (void)viewDidLoad {
     
     [super viewDidLoad];
@@ -28,7 +29,6 @@
     self.titleLabel = [UILabel newAutoLayoutView];
     [self.titleLabel setText: @"Welcome to milzi!"];
     self.titleLabel.textColor = UIColorFromRGB(0xF38630);
-    
     self.titleLabel.textAlignment = NSTextAlignmentCenter;
     self.titleLabel.font = [UIFont systemFontOfSize:32.0f];
     
@@ -61,37 +61,10 @@
     return YES;
 }
 
-- (void)showErrorMessage:(NSString *)errorMessage {
-    self.finePrint.text = errorMessage;
-}
-
-- (BOOL)isAlphaNumeric:(NSString *)aString {
-    NSCharacterSet *unwantedCharacters =
-    [[NSCharacterSet alphanumericCharacterSet] invertedSet];
-    
-    return ([aString rangeOfCharacterFromSet:unwantedCharacters].location == NSNotFound);
-}
-
-- (BOOL)isInputValid {
-    
-    BOOL isValid = true;
-    NSUInteger len = [self.usernameTextField.text length];
-    
-    if (len == 0) {
-        isValid = NO;
-        [self showErrorMessage:@"can't be empty"];
-    } else if (len > 20) {
-        isValid = NO;
-        [self showErrorMessage: @"let's stick to 20 characters"];
-    } else if (![self isAlphaNumeric:self.usernameTextField.text]) {
-        [self showErrorMessage:@"only letters and numbers"];
-        isValid = NO;
-    }
-    
-    return isValid;
-}
+#pragma mark - Networking
 
 - (void)signup {
+    
     if ([self isInputValid]) {
         [self showErrorMessage:@"connecting..."];
         
@@ -134,7 +107,9 @@
     }
 }
 
+#pragma mark - AutoLayout
 - (void)viewDidLayoutSubviews {
+    
     [super viewDidLayoutSubviews];
     [self updateViewConstraints];
     
@@ -145,6 +120,7 @@
 }
 
 - (void) updateViewConstraints {
+    
     [super updateViewConstraints];
     
     CGSize screenRect = [[UIScreen mainScreen] bounds].size;
@@ -162,6 +138,39 @@
     
     [self.signUpButton autoPinEdge:ALEdgeTop toEdge:ALEdgeBottom ofView:self.finePrint withOffset:30];
     [self.signUpButton autoPinEdge:ALEdgeRight toEdge:ALEdgeRight ofView:self.usernameTextField];
+}
+
+#pragma mark - Utils
+
+- (void)showErrorMessage:(NSString *)errorMessage {
+    self.finePrint.text = errorMessage;
+}
+
+- (BOOL)isAlphaNumeric:(NSString *)aString {
+    
+    NSCharacterSet *unwantedCharacters =
+    [[NSCharacterSet alphanumericCharacterSet] invertedSet];
+    
+    return ([aString rangeOfCharacterFromSet:unwantedCharacters].location == NSNotFound);
+}
+
+- (BOOL)isInputValid {
+    
+    BOOL isValid = true;
+    NSUInteger len = [self.usernameTextField.text length];
+    
+    if (len == 0) {
+        isValid = NO;
+        [self showErrorMessage:@"can't be empty"];
+    } else if (len > 20) {
+        isValid = NO;
+        [self showErrorMessage: @"let's stick to 20 characters"];
+    } else if (![self isAlphaNumeric:self.usernameTextField.text]) {
+        [self showErrorMessage:@"only letters and numbers"];
+        isValid = NO;
+    }
+    
+    return isValid;
 }
 
 @end

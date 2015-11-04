@@ -124,6 +124,7 @@
 }
 
 - (void)layoutSubviews {
+    
     [super layoutSubviews];
     
     self.noButton.layer.cornerRadius = floor(self.noButton.bounds.size.width / 2.0);
@@ -131,11 +132,13 @@
 }
 
 - (void)disableCellButtons {
+    
     self.yesButton.userInteractionEnabled = NO;
     self.noButton.userInteractionEnabled = NO;
 }
 
 - (void)enableCellButtons {
+    
     self.yesButton.userInteractionEnabled = YES;
     self.noButton.userInteractionEnabled = YES;
 }

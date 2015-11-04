@@ -65,7 +65,7 @@ const NSUInteger MAX_CHAR_COUNT = 100;
                                      initWithFrame:CGRectMake(kHorizontalInsets/ 2, kVerticalInsets * 2,
                                                               2 * kHorizontalInsets, 2 * kVerticalInsets)];
     
-    self.questionCharCounterLabel.text = [NSString stringWithFormat:@"%ld", MAX_CHAR_COUNT];
+    self.questionCharCounterLabel.text = [NSString stringWithFormat:@"%lu", (unsigned long)MAX_CHAR_COUNT];
     self.questionCharCounterLabel.font = [UIFont systemFontOfSize:12.0f weight:UIFontWeightSemibold];
     self.questionCharCounterLabel.textColor = [UIColor lightGrayColor];
     self.questionCharCounterLabel.textAlignment = NSTextAlignmentCenter;
@@ -123,7 +123,7 @@ const NSUInteger MAX_CHAR_COUNT = 100;
     
     if ([textView.text isEqualToString:@"Enter your question..."]) {
         textView.text = @"";
-        textView.textColor = [UIColor blackColor]; //optional
+        textView.textColor = [UIColor blackColor];
     }
     
     [textView becomeFirstResponder];
@@ -133,7 +133,7 @@ const NSUInteger MAX_CHAR_COUNT = 100;
     
     if ([textView.text isEqualToString:@""]) {
         textView.text = @"Enter your question...";
-        textView.textColor = [UIColor lightGrayColor]; //optional
+        textView.textColor = [UIColor lightGrayColor];
     }
     
     [textView resignFirstResponder];
@@ -166,7 +166,9 @@ const NSUInteger MAX_CHAR_COUNT = 100;
 }
 
 #pragma mark - AutoLayout
+
 - (void)viewDidLayoutSubviews {
+    
     [super viewDidLayoutSubviews];
     [self updateSubviewsConstraints];
 }
@@ -205,6 +207,7 @@ const NSUInteger MAX_CHAR_COUNT = 100;
 }
 
 #pragma mark - Keyboard Events
+
 -(void)keyboardWillShow:(NSNotification *)notification {
     
     NSDictionary *userInfo  = notification.userInfo;
@@ -223,6 +226,7 @@ const NSUInteger MAX_CHAR_COUNT = 100;
 }
 
 -(void)keyboardWillHide {
+    
     //removing and readding the view to break the purelayout autolayout contsraints
     [self.buttonsView removeFromSuperview];
     [self.view addSubview:self.buttonsView];
@@ -376,18 +380,18 @@ const NSUInteger MAX_CHAR_COUNT = 100;
     NSURLSessionUploadTask *postDataTask = [session uploadTaskWithRequest:request fromData:body completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         
         if (error) {
-            NSLog(@"error: %@", [error userInfo]);
-            [JDStatusBarNotification showWithStatus:@"didn't work, try again" dismissAfter:2.0 styleName:JDStatusBarStyleWarning];
+           // NSLog(@"error: %@", [error userInfo]);
+            [JDStatusBarNotification showWithStatus:@"didn't work :( try again" dismissAfter:2.0 styleName:JDStatusBarStyleWarning];
             [self.tabBarController setSelectedIndex:1];
         } else {
-            [JDStatusBarNotification showWithStatus:@"success" dismissAfter:2.0 styleName:JDStatusBarStyleSuccess];
+            [JDStatusBarNotification showWithStatus:@"woohoo! poll uploaded" dismissAfter:2.0 styleName:JDStatusBarStyleSuccess];
             //reset views
             self.questionTextView.text = @"Enter your question...";
             //because otherwise if the user cancels while typing and comes back to this view, the placeholder text won't appear
             //since it is the first responser, it will call textViewDidBeginEditing and remove the placeholder text
             [self dismissKeyboard];
             self.questionTextView.textColor = [UIColor lightGrayColor];
-            self.questionCharCounterLabel.text = [NSString stringWithFormat:@"%ld", MAX_CHAR_COUNT];
+            self.questionCharCounterLabel.text = [NSString stringWithFormat:@"%lu", (unsigned long)MAX_CHAR_COUNT];
             self.chosenImgView.image = nil;
         }
     }];
@@ -417,7 +421,5 @@ const NSUInteger MAX_CHAR_COUNT = 100;
     
     return imageData;
 }
-
-
 
 @end

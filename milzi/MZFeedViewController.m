@@ -13,13 +13,12 @@ static NSString *CellIdentifier = @"MilZiCellID";
 @implementation MZFeedViewController
 
 - (void)viewDidLoad {
+    
     [super viewDidLoad];
     
     [self.navigationItem setTitle:self.navBarTitleString];
-
     self.navigationController.navigationBar.barTintColor = UIColorFromRGB(0x69D2E7);
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-    
     [self.navigationController.navigationBar
      setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor],
                               NSFontAttributeName: [UIFont systemFontOfSize:22.0f]}];
@@ -27,16 +26,14 @@ static NSString *CellIdentifier = @"MilZiCellID";
     [self.tableView registerClass:[MZTableViewCell class] forCellReuseIdentifier:CellIdentifier];
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     self.tableView.estimatedRowHeight = 200.0;
-    
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.tableView.allowsSelection = NO;
     self.tableView.showsVerticalScrollIndicator = NO;
     
     self.deviceCache = [NSUserDefaults standardUserDefaults];
-    
     self.dataArray = [[NSMutableArray alloc] init];
-    [self getLatestUpdates];
     
+    [self getLatestUpdates];
     [self setupRefreshControl];
 }
 
@@ -54,6 +51,7 @@ static NSString *CellIdentifier = @"MilZiCellID";
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    
     return [self.dataArray count];
 }
 
@@ -68,7 +66,6 @@ static NSString *CellIdentifier = @"MilZiCellID";
 #pragma mark - UITableViewCell Configuration
 
 - (void)configureCustomCell:(MZTableViewCell*)cell atIndexPath:(NSIndexPath *)indexPath {
-    [cell updateFonts];
     
     NSDictionary *dict = [self.dataArray objectAtIndex:indexPath.row];
     NSNumber *itemID = [dict objectForKey:@"ID"];
@@ -79,7 +76,8 @@ static NSString *CellIdentifier = @"MilZiCellID";
     NSUInteger yesVotes = [[dict objectForKey:@"YesVotes"] integerValue];
     NSUInteger noVotes = [[dict objectForKey:@"NoVotes"] integerValue];
     NSUInteger totalVotes = yesVotes + noVotes;
-    
+
+    [cell updateFonts];
     cell.questionLabel.text = question;
     cell.nameLabel.text = [NSString stringWithFormat:@"by %@", author];
     [cell.mainImageView sd_setImageWithURL:[NSURL URLWithString:imgURL]
@@ -97,7 +95,7 @@ static NSString *CellIdentifier = @"MilZiCellID";
     [cell.yesButton addTarget:self action:@selector(tappedYes:) forControlEvents:UIControlEventTouchUpInside];
     [cell.noButton addTarget:self action:@selector(tappedNo:) forControlEvents:UIControlEventTouchUpInside];
     
-    NSString *myVote = [self.self.deviceCache stringForKey:[itemID stringValue]];
+    NSString *myVote = [self.deviceCache stringForKey:[itemID stringValue]];
     
     if (myVote) {
         //adding 1 to all the calculations since votes in this session are not reflected in the dictionary retrieved from the server since it is immutable.
@@ -116,11 +114,11 @@ static NSString *CellIdentifier = @"MilZiCellID";
         yesPercent = ((double)yesVotes / totalVotes) * 100.0f;
         noPercent = ((double)noVotes / totalVotes) * 100.0f;
         
-        cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
+        cell.voteCountLabel.text = [NSString stringWithFormat:@"%lu votes (%g%%, %g%%)", (unsigned long)totalVotes, ceil(yesPercent),floor(noPercent)];
     } else if (totalVotes == 0) {
         cell.voteCountLabel.text = @"Be the first to vote!";
     } else {
-        cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes", totalVotes];
+        cell.voteCountLabel.text = [NSString stringWithFormat:@"%lu votes", (unsigned long)totalVotes];
     }
     
     [cell setNeedsUpdateConstraints];
@@ -134,8 +132,8 @@ static NSString *CellIdentifier = @"MilZiCellID";
     //sender.tag has the cell's IndexPath.row
     NSMutableDictionary *dict = [self.dataArray objectAtIndex:sender.tag];
     NSString *itemID = [[dict objectForKey:@"ID"] stringValue];
-    [self.self.deviceCache setValue:@"yes" forKey:itemID];
-    [self.self.deviceCache synchronize];
+    [self.deviceCache setValue:@"yes" forKey:itemID];
+    [self.deviceCache synchronize];
     
     sender.layer.borderColor = UIColorFromRGB(0xF38630).CGColor;
     MZTableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:sender.tag inSection:0]];
@@ -145,7 +143,7 @@ static NSString *CellIdentifier = @"MilZiCellID";
     NSUInteger totalVotes = yesVotes + noVotes;
     double yesPercent = ((double)yesVotes / totalVotes) * 100.0f;
     double noPercent = ((double)noVotes / totalVotes) * 100.0f;
-    cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
+    cell.voteCountLabel.text = [NSString stringWithFormat:@"%lu votes (%g%%, %g%%)", (unsigned long)totalVotes, ceil(yesPercent),floor(noPercent)];
     
     [cell disableCellButtons];
     [self sendVotingRequestForID:itemID andAction:@"upvote"];
@@ -157,7 +155,7 @@ static NSString *CellIdentifier = @"MilZiCellID";
     NSMutableDictionary *dict = [self.dataArray objectAtIndex:sender.tag];
     NSString *itemID = [[dict objectForKey:@"ID"] stringValue];
     
-    [self.self.deviceCache setValue:@"no" forKey:itemID];
+    [self.deviceCache setValue:@"no" forKey:itemID];
     [self.deviceCache synchronize];
     sender.layer.borderColor = UIColorFromRGB(0xF38630).CGColor;
     
@@ -168,7 +166,7 @@ static NSString *CellIdentifier = @"MilZiCellID";
     NSUInteger totalVotes = yesVotes + noVotes;
     double yesPercent = ((double)yesVotes / totalVotes) * 100.0f;
     double noPercent = ((double)noVotes / totalVotes) * 100.0f;
-    cell.voteCountLabel.text = [NSString stringWithFormat:@"%ld votes (%g%%, %g%%)", totalVotes, ceil(yesPercent),floor(noPercent)];
+    cell.voteCountLabel.text = [NSString stringWithFormat:@"%lu votes (%g%%, %g%%)", (unsigned long)totalVotes, ceil(yesPercent),floor(noPercent)];
     
     [cell disableCellButtons];
     [self sendVotingRequestForID:itemID andAction:@"downvote"];
@@ -215,8 +213,8 @@ static NSString *CellIdentifier = @"MilZiCellID";
 }
 
 - (void)showErrorMessage:(NSString *)error {
-    UILabel *messageLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width - 50, self.view.bounds.size.height)];
     
+    UILabel *messageLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width - 50, self.view.bounds.size.height)];
     messageLabel.text = error;
     messageLabel.textColor = [UIColor blackColor];
     messageLabel.numberOfLines = 3;

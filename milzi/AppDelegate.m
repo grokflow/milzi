@@ -8,8 +8,6 @@
 
 #import "AppDelegate.h"
 
-
-
 @interface AppDelegate ()
 
 @end
@@ -37,7 +35,7 @@
 
     
     UINavigationController *pollNavigationController = [[UINavigationController alloc] initWithRootViewController:addPollViewController];
-    pollNavigationController.tabBarItem.title = @"add";
+    pollNavigationController.tabBarItem.title = @"new poll";
     pollNavigationController.tabBarItem.image = [UIImage imageNamed:@"add"];
 
     
@@ -52,7 +50,6 @@
                                                  nil];
 
     tabBars.viewControllers = localViewControllersArray;
-    tabBars.view.autoresizingMask=(UIViewAutoresizingFlexibleHeight);
     self.window.rootViewController = tabBars;
         
     // Override point for customization after application launch

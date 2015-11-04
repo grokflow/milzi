@@ -10,6 +10,11 @@
 #import "MZTableViewCell.h"
 #import "Constants.h"
 
+/**
+ *  MZFeedViewController is a sublass of UITableViewController which shows images with the ability to vote on them.
+ 
+ Users subclassing it, should provide values for navBarTitleString and refreshControlMessage, and implement getLatestUpdates
+ */
 @interface MZFeedViewController : UITableViewController
 
 @property(strong, nonatomic) NSString *navBarTitleString;
